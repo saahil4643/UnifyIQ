@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UnifyIQ — Multi-Supplier Optimization Demo | VoyageHack 4.0</title>
+<meta name="description" content="Interactive demo of UnifyIQ: Match & Merge, Best-Offer Comparison and Smart Listing Ranking for TBO multi-supplier catalogs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="logo" href="#top"><span class="logo-mark">U</span><span>Unify<b>IQ</b></span></a>
+    <nav>
+      <a href="#merge">Match &amp; Merge</a>
+      <a href="#offers">Best Offer</a>
+      <a href="#rank">Ranking</a>
+      <a href="#impact">Impact</a>
+      <a href="#rollout">Rollout</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">VoyageHack 4.0 · TBO Multi-Supplier Optimization</p>
+    <h1>Three engines. <span class="grad">One clean, comparable,<br> high-converting catalog.</span></h1>
+    <p class="lead">UnifyIQ turns messy multi-supplier feeds into golden listings, picks the best offer per product, and ranks results by what actually converts. Try each engine below — everything runs live in your browser on sample data.</p>
+    <div class="hero-cta">
+      <a class="btn primary" href="#merge">Start the demo</a>
+      <a class="btn ghost" href="#pipeline">See the pipeline</a>
+    </div>
+    <div class="hero-stats">
+      <div><b data-count="30" data-suffix="–40%">0</b><span>fewer duplicate listings</span></div>
+      <div><b data-count="10" data-suffix="–15%">0</b><span>higher search-to-booking</span></div>
+      <div><b>Best price</b><span>on every listing page</span></div>
+      <div><b>Fewer failures</b><span>reliability-aware choice</span></div>
+    </div>
+    <p class="note">Impact figures are pilot targets, to be validated.</p>
+  </div>
+</section>
+
+<!-- PIPELINE -->
+<section id="pipeline" class="sec alt">
+  <div class="wrap">
+    <h2>How it flows</h2>
+    <p class="sub">Matching runs offline and incrementally; ranking is served from cache for low latency. No supplier-side changes needed.</p>
+    <div class="pipe" id="pipe"></div>
+    <p class="pipe-detail" id="pipeDetail"></p>
+  </div>
+</section>
+
+<!-- ENGINE 1 -->
+<section id="merge" class="sec">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">01</span><div><h2>Match &amp; Merge Engine</h2>
+    <p class="sub">Variant-aware matching, not just dedupe — preserve the differences that matter to the traveller.</p></div></div>
+
+    <div class="tabs" role="tablist" id="mergeTabs">
+      <button class="tab active" data-tab="hotels" role="tab">Hotels</button>
+      <button class="tab" data-tab="sights" role="tab">Sightseeing</button>
+    </div>
+
+    <!-- Hotels -->
+    <div class="panel" id="tab-hotels">
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><h3>Raw supplier feeds</h3><span class="pill">5 listings</span></div>
+          <div id="rawHotels" class="stack"></div>
+          <div class="row-btns">
+            <button class="btn primary" id="runMatch">▶ Run Match &amp; Merge</button>
+            <button class="btn ghost" id="resetMatch">Reset</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><h3>Matching pipeline</h3><span class="pill" id="matchState">Idle</span></div>
+          <ol class="steps" id="matchSteps">
+            <li data-s="0"><i></i><div><b>Normalize</b><small>Lowercase, strip stop-words, expand abbreviations (HTL → hotel)</small></div></li>
+            <li data-s="1"><i></i><div><b>Candidate blocking</b><small>Geo-hash cell + text key narrows pairs to compare</small></div></li>
+            <li data-s="2"><i></i><div><b>Score pairs</b><small>Geo distance · name · address · image-hash similarity</small></div></li>
+            <li data-s="3"><i></i><div><b>Classify</b><small>Rules + embeddings; LLM only if confidence is low</small></div></li>
+            <li data-s="4"><i></i><div><b>Golden property</b><small>Merge best content &amp; images, map room types</small></div></li>
+          </ol>
+          <div id="pairs" class="pairs"></div>
+        </div>
+      </div>
+
+      <div id="golden" class="golden hidden">
+        <div class="golden-h">
+          <div><span class="pill ok">Golden ID · GP-DXB-004217</span>
+          <h3>Grand Hyatt Dubai</h3>
+          <p class="muted">Sheikh Rashid Rd, Umm Hurair 2, Dubai, UAE · ★★★★★ · 25.2285, 55.3273</p></div>
+          <div class="kpi"><b id="kDup">5 → 2</b><span>listings after merge</span></div>
+        </div>
+        <p class="enrich"><b>LLM-enriched description:</b> A landmark five-star resort on the Dubai Creek with landscaped gardens, multiple pools and direct access to the Metro — merged from the three richest supplier descriptions.</p>
+        <h4>Room type mapping → canonical taxonomy</h4>
+        <div class="rooms" id="rooms"></div>
+        <div class="review">
+          <span class="pill warn">Review queue · 1</span>
+          <span>"Hyatt Regency Creek Heights" kept separate after an LLM check (confidence 0.50). Reviewer corrections become training data — and every merge has an easy <button class="link" id="unmerge">unmerge</button>.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sightseeing -->
+    <div class="panel hidden" id="tab-sights">
+      <div class="card">
+        <div class="card-h"><h3>Experience Fingerprint · Burj Khalifa “At the Top”</h3><span class="pill">Base: Supplier A</span></div>
+        <p class="muted">Each offer gets a fingerprint of inclusions, transfers, meals, duration, access type and cancellation. Pairs are labelled <b class="t-exact">Exact</b>, <b class="t-equiv">Equivalent</b> or <b class="t-var">Variant</b> — so real differences are never merged away. Click a row to inspect the diff.</p>
+        <div class="tbl-wrap"><table class="tbl" id="fpTable"></table></div>
+        <div id="fpDetail" class="fp-detail"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ENGINE 2 -->
+<section id="offers" class="sec alt">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">02</span><div><h2>Best-Offer Comparison</h2>
+    <p class="sub">One product card, many offers — suppliers compared side by side. Reliability is computed from live signals.</p></div></div>
+
+    <div class="card">
+      <div class="card-h"><div><h3>Grand Hyatt Dubai · Deluxe King, City View</h3><p class="muted">2 nights · 2 adults</p></div>
+        <div class="seg" id="goal">
+          <button data-g="value" class="active">Best Value</button>
+          <button data-g="price">Lowest price</button>
+          <button data-g="rel">Most reliable</button>
+        </div>
+      </div>
+      <div class="tbl-wrap"><table class="tbl offers" id="offerTable"></table></div>
+      <div class="formula"><b>Supplier Reliability Score</b> = 100 − (booking-failure rate × 400) − (price-change rate × 150) − (avg response ms ÷ 60). <br><b>Best Value</b> = 50% price + 30% reliability + 20% cancellation flexibility.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ENGINE 3 -->
+<section id="rank" class="sec">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">03</span><div><h2>Smart Listing Ranking</h2>
+    <p class="sub">Learning-to-rank across seven signals. Tune the weights, switch presets, or simulate the feedback loop.</p></div></div>
+
+    <div class="grid-rank">
+      <div class="card">
+        <div class="card-h"><h3>Ranking model</h3><span class="pill" id="modelVer">LTR v1</span></div>
+        <div class="presets">
+          <button class="btn ghost sm" data-p="legacy">Current (relevance-led)</button>
+          <button class="btn ghost sm active" data-p="ltr">UnifyIQ LTR</button>
+          <button class="btn ghost sm" data-p="price">Price-hunter</button>
+        </div>
+        <div id="sliders"></div>
+        <button class="btn primary full" id="feedback">⟳ Simulate 1,000 bookings (feedback loop)</button>
+        <p class="muted small" id="fbLog">Clicks and bookings continuously retrain the model; every change is A/B tested against the current ranking.</p>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Search results · Dubai, 2 nights</h3><span class="pill" id="abPill">Top-3 changed vs. current: 0</span></div>
+        <div id="rankList" class="rank-list"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INNOVATION + IMPACT -->
+<section id="impact" class="sec alt">
+  <div class="wrap">
+    <h2>What is innovative</h2>
+    <div class="feat">
+      <article><h4>Variant-aware matching</h4><p>Preserves differences that matter to the traveller instead of merging them away.</p></article>
+      <article><h4>Hybrid AI</h4><p>Rules + text/image embeddings; an LLM only for low-confidence pairs — accurate and cost-controlled.</p></article>
+      <article><h4>Content enrichment</h4><p>LLM merges the best descriptions and images from every supplier.</p></article>
+      <article><h4>Multi-objective ranking</h4><p>Balances conversion, price competitiveness and supplier reliability.</p></article>
+      <article><h4>Human-in-the-loop</h4><p>A review queue turns corrections into training data.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ROLLOUT -->
+<section id="rollout" class="sec">
+  <div class="wrap">
+    <h2>Feasibility, rollout &amp; adoption risk</h2>
+    <p class="sub"><b>Stack:</b> Python · PostgreSQL + PostGIS + pgvector · Kafka/queue · LightGBM ranker · vision/text embeddings · LLM for edge cases.</p>
+    <div class="timeline">
+      <div class="ph"><span>Weeks 1–4</span><h4>Phase 1</h4><p>Hotel dedupe + room mapping on a pilot city set.</p></div>
+      <div class="ph"><span>Weeks 5–8</span><h4>Phase 2</h4><p>Sightseeing fingerprint + best-offer comparison.</p></div>
+      <div class="ph"><span>Weeks 9–12</span><h4>Phase 3</h4><p>Ranking model, shadow mode, then A/B test and rollout.</p></div>
+    </div>
+    <h3 class="mt">Risks &amp; mitigations</h3>
+    <div id="risks" class="risks"></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">UnifyIQ · VoyageHack 4.0 · TBO Multi-Supplier Optimization — demo uses illustrative sample data only.</div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
