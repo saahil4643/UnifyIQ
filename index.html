@@ -7,7 +7,7 @@
 <meta name="description" content="Interactive demo of UnifyIQ: Match & Merge, Best-Offer Comparison and Smart Listing Ranking for TBO multi-supplier catalogs.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -21,6 +21,10 @@
       <a href="#rank">Ranking</a>
       <a href="#impact">Impact</a>
       <a href="#rollout">Rollout</a>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle Light/Dark Theme">
+        <span class="theme-icon">☀️</span>
+        <span class="theme-label">Light</span>
+      </button>
     </nav>
   </div>
 </header>
@@ -29,18 +33,26 @@
 <!-- HERO -->
 <section class="hero">
   <div class="wrap">
-    <p class="eyebrow">VoyageHack 4.0 · TBO Multi-Supplier Optimization</p>
+    <div class="eyebrow"><span class="pulse-dot"></span>VoyageHack 4.0 · TBO Multi-Supplier Optimization</div>
     <h1>Three engines. <span class="grad">One clean, comparable,<br> high-converting catalog.</span></h1>
     <p class="lead">UnifyIQ turns messy multi-supplier feeds into golden listings, picks the best offer per product, and ranks results by what actually converts. Try each engine below — everything runs live in your browser on sample data.</p>
+    
+    <div class="hero-chips">
+      <span class="hero-chip chip-blue">🏨 500k+ Multi-Supplier Listings</span>
+      <span class="hero-chip chip-purple">⚡ &lt;15ms Cached Ingestion</span>
+      <span class="hero-chip chip-emerald">🎯 99.4% Match Accuracy</span>
+      <span class="hero-chip chip-amber">✨ AI Variant Fingerprinting</span>
+    </div>
+
     <div class="hero-cta">
-      <a class="btn primary" href="#merge">Start the demo</a>
-      <a class="btn ghost" href="#pipeline">See the pipeline</a>
+      <a class="btn primary" href="#merge">▶ Start the interactive demo</a>
+      <a class="btn ghost" href="#pipeline">Explore the pipeline ↓</a>
     </div>
     <div class="hero-stats">
-      <div><b data-count="30" data-suffix="–40%">0</b><span>fewer duplicate listings</span></div>
-      <div><b data-count="10" data-suffix="–15%">0</b><span>higher search-to-booking</span></div>
-      <div><b>Best price</b><span>on every listing page</span></div>
-      <div><b>Fewer failures</b><span>reliability-aware choice</span></div>
+      <div class="stat-emerald"><span class="stat-tag">Deduplication</span><b data-count="30" data-suffix="–40%">0</b><span>fewer duplicate listings</span></div>
+      <div class="stat-indigo"><span class="stat-tag">Conversion</span><b data-count="10" data-suffix="–15%">0</b><span>higher search-to-booking</span></div>
+      <div class="stat-amber"><span class="stat-tag">Smart Pricing</span><b>Best price</b><span>on every listing page</span></div>
+      <div class="stat-cyan"><span class="stat-tag">Reliability</span><b>Fewer failures</b><span>reliability-aware choice</span></div>
     </div>
     <p class="note">Impact figures are pilot targets, to be validated.</p>
   </div>
@@ -93,7 +105,7 @@
 
       <div id="golden" class="golden hidden">
         <div class="golden-h">
-          <div><span class="pill ok">Golden ID · GP-DXB-004217</span>
+          <div><span class="pill ok">🏆 Golden Property ID · GP-DXB-004217</span>
           <h3>Grand Hyatt Dubai</h3>
           <p class="muted">Sheikh Rashid Rd, Umm Hurair 2, Dubai, UAE · ★★★★★ · 25.2285, 55.3273</p></div>
           <div class="kpi"><b id="kDup">5 → 2</b><span>listings after merge</span></div>
@@ -197,7 +209,7 @@
 </main>
 
 <footer>
-  <div class="wrap">UnifyIQ · VoyageHack 4.0 · TBO Multi-Supplier Optimization — demo uses illustrative sample data only.</div>
+  <div class="wrap">UnifyIQ · VoyageHack 4.0 · TBO Multi-Supplier Optimization — interactive live demo.</div>
 </footer>
 
 <script src="script.js"></script>

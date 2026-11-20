@@ -4,6 +4,32 @@
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+  /* ---------- Theme toggle (Light default, Dark available) ---------- */
+  const themeBtn = $('#themeToggle');
+  function setTheme(t) {
+    document.documentElement.dataset.theme = t;
+    try { localStorage.setItem('unifyiq-theme', t); } catch(e) {}
+    if (themeBtn) {
+      const isDark = t === 'dark';
+      const icon = $('.theme-icon', themeBtn);
+      const label = $('.theme-label', themeBtn);
+      if (icon) icon.textContent = isDark ? '🌙' : '☀️';
+      if (label) label.textContent = isDark ? 'Dark' : 'Light';
+    }
+  }
+  let initialTheme = 'light';
+  try {
+    initialTheme = localStorage.getItem('unifyiq-theme') || 'light';
+  } catch(e) {}
+  setTheme(initialTheme);
+
+  if (themeBtn) {
+    themeBtn.onclick = () => {
+      const current = document.documentElement.dataset.theme || 'light';
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    };
+  }
+
   /* ---------- Hero counters ---------- */
   $$('[data-count]').forEach(el => {
     const end = +el.dataset.count, suf = el.dataset.suffix || '';
@@ -17,7 +43,7 @@
 
   /* ---------- Pipeline ---------- */
   const PIPE = [
-    ['Supplier feeds', 'Hotels & Sightseeing APIs', 'Existing supplier APIs are used as-is — no supplier-side changes are required.'],
+    ['Supplier feeds', 'Hotels & Sightseeing APIs', 'Existing supplier APIs are ingested as-is — no supplier-side changes are required.'],
     ['Ingest & normalize', 'names, geo, rooms, policies', 'Names, coordinates, room types and cancellation policies are normalised into one schema. If unsure, we fall back to raw supplier data.'],
     ['Candidate blocking', 'geo-hash + text keys', 'Geo-hash cells and text keys cut the comparison space from millions of pairs to a few nearby candidates.'],
     ['Match & classify', 'rules + embeddings + LLM', 'Rules and text/image embeddings decide most pairs. An LLM is called only for low-confidence pairs to control cost.'],
@@ -27,8 +53,8 @@
   const pipe = $('#pipe'), pd = $('#pipeDetail');
   PIPE.forEach((p, i) => {
     const b = document.createElement('button');
-    b.className = 'pn' + (i === 0 ? ' active' : '');
-    b.innerHTML = `<b>${p[0]}</b><small>${p[1]}</small>`;
+    b.className = 'pn pn-' + i + (i === 0 ? ' active' : '');
+    b.innerHTML = `<span class="pn-step">0${i + 1}</span><b>${p[0]}</b><small>${p[1]}</small>`;
     b.onclick = () => { $$('.pn').forEach(x => x.classList.remove('active')); b.classList.add('active'); pd.textContent = p[2]; };
     pipe.appendChild(b);
   });
@@ -63,7 +89,10 @@
 
   const rawBox = $('#rawHotels');
   function renderRaw() {
-    rawBox.innerHTML = RAW.map(r => `<div class="raw" id="raw-${r.id}"><span class="sup">${r.sup}</span><h4>${r.name}</h4><p>${r.addr}</p><p class="geo">${r.geo}</p></div>`).join('');
+    rawBox.innerHTML = RAW.map(r => {
+      const supClass = r.sup === 'Supplier A' ? 'sup-a' : r.sup === 'Supplier B' ? 'sup-b' : 'sup-c';
+      return `<div class="raw" id="raw-${r.id}"><span class="sup ${supClass}">${r.sup}</span><h4>${r.name}</h4><p>${r.addr}</p><p class="geo">${r.geo}</p></div>`;
+    }).join('');
   }
   renderRaw();
 
@@ -77,8 +106,9 @@
     for (let i = 0; i < steps.length; i++) {
       steps.forEach((s, j) => { s.classList.toggle('on', j === i); s.classList.toggle('done', j < i); });
       if (i === 2) {
+        const barClasses = ['bar-geo', 'bar-name', 'bar-addr', 'bar-img'];
         pairsBox.innerHTML = PAIRS.map((p, k) => `<div class="pair" id="pair-${k}"><div class="pt"><span>${nm(p.a)} ↔ ${nm(p.b)}</span><span class="score">…</span></div>
-          <div class="bars">${['Geo', 'Name', 'Address', 'Image'].map((l, j) => `<div class="bar"><small>${l} ${(p.s[j] * 100) | 0}%</small><div><i data-w="${p.s[j] * 100}"></i></div></div>`).join('')}</div></div>`).join('');
+          <div class="bars">${['Geo', 'Name', 'Address', 'Image'].map((l, j) => `<div class="bar ${barClasses[j]}"><small>${l} ${(p.s[j] * 100) | 0}%</small><div><i data-w="${p.s[j] * 100}"></i></div></div>`).join('')}</div></div>`).join('');
         await sleep(60);
         $$('.bar i', pairsBox).forEach(el => el.style.width = el.dataset.w + '%');
       }
@@ -225,7 +255,7 @@
   const list = $('#rankList');
   HOTELS.forEach(h => {
     const el = document.createElement('div'); el.className = 'rk'; el.id = 'rk-' + h.id;
-    el.innerHTML = `<div class="pos"></div><div><h4>${h.name}<span class="mv"></span></h4><div class="meta">${h.meta}</div><div class="mini">${h.f.map(v => `<i title="${v}"><b style="width:${v}%"></b></i>`).join('')}</div></div><div class="sc"><b></b><small>rank score</small></div>`;
+    el.innerHTML = `<div class="pos"></div><div><h4>${h.name}<span class="mv"></span></h4><div class="meta">${h.meta}</div><div class="mini">${h.f.map((v, idx) => `<i title="${v}" class="m-${idx}"><b style="width:${v}%"></b></i>`).join('')}</div></div><div class="sc"><b></b><small>rank score</small></div>`;
     list.appendChild(el);
   });
   function update() {
